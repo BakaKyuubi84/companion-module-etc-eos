@@ -902,16 +902,10 @@ class ModuleInstance extends InstanceBase {
 		}
 		this.cueListRecords = new Map()
 
-		// Drop the per-cue-number variables, and re-create the positional ones for the configured count.
+		// Drop the per-cue variables; they're re-created as the cues arrive.
 		this.cueListDefinedNumbers = []
 		this.setVariableDefinitions(GetVariableDefinitions(this))
-
-		const emptyValues = { cue_list_count: '' }
-		for (let i = 1; i <= this.getNumCuesToPoll(); i++) {
-			emptyValues[`cue_index_${i}_num`] = ''
-			emptyValues[`cue_index_${i}_label`] = ''
-		}
-		this.setInstanceStates(emptyValues, true)
+		this.setInstanceStates({ cue_list_count: '' }, true)
 	}
 
 	/**
@@ -991,17 +985,19 @@ class ModuleInstance extends InstanceBase {
 	}
 
 	/**
-	 * Recomputes the cue_index_X_* variables, and the cue_N_label variables once their definitions exist.
+	 * The variable id for a cue's label: cue_<list>_<cue>_label, with dots in the cue number as underscores.
+	 */
+	cueLabelVariableId(cueNumber) {
+		return `cue_${this.getCueListToPoll()}_${this.cueNumberToVariableId(cueNumber)}_label`
+	}
+
+	/**
+	 * Updates the cue_<list>_<cue>_label variables, creating definitions for new cue numbers first.
 	 */
 	updateCueListVariables() {
 		const cues = this.getSortedCueListRecords()
 
 		const values = {}
-		for (let i = 1; i <= this.getNumCuesToPoll(); i++) {
-			const cue = cues[i - 1]
-			values[`cue_index_${i}_num`] = cue ? cue.num : ''
-			values[`cue_index_${i}_label`] = cue ? cue.label : ''
-		}
 
 		const cueNumbers = cues.map((cue) => cue.num)
 		const definitionsChanged =
@@ -1010,7 +1006,7 @@ class ModuleInstance extends InstanceBase {
 
 		if (!definitionsChanged) {
 			for (const cue of cues) {
-				values[`cue_${this.cueNumberToVariableId(cue.num)}_label`] = cue.label
+				values[this.cueLabelVariableId(cue.num)] = cue.label
 			}
 		} else if (this.cueListDefinitionsTimer === undefined) {
 			// New cue numbers need new variable definitions. Batch them, as cues arrive one message at a time.
@@ -1022,7 +1018,9 @@ class ModuleInstance extends InstanceBase {
 			}, 250)
 		}
 
-		this.setInstanceStates(values, true)
+		if (Object.keys(values).length > 0) {
+			this.setInstanceStates(values, true)
+		}
 	}
 
 	/**

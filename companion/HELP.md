@@ -261,18 +261,16 @@ There is a sample Stream Deck + configuration file in the github repository that
 
 ## Cue list variables
 
-The module reads the cues of one cue list (set with **Cue list for cue variables**, default `1`), up to the **Cues to poll** count (default 30), and keeps them up to date when cues are added, changed or deleted on the console.
+The module reads the cues of one cue list (set with **Cue list for cue variables**, default `1`), and keeps them up to date when cues are added, changed or deleted on the console. **Cues to poll** (default 30) is the most cues it reads, starting from the first cue in the list; set it at least as high as the number of cues in your list.
 
-| Variable                 | Description                                                                 | Example value |
-| ------------------------ | --------------------------------------------------------------------------- | ------------- |
-| cue_list_count           | Number of cues in the cue list                                              | 42            |
-| cue_index_X_num          | Cue number of the Xth cue in the list (X starts at 1)                       | 10.5          |
-| cue_index_X_label        | Label of the Xth cue in the list                                            | Blackout      |
-| cue_N_label              | Label of cue number N. Dots in the cue number become underscores.           | Blackout      |
+| Variable             | Description                                                                          | Example value |
+| -------------------- | ------------------------------------------------------------------------------------ | ------------- |
+| cue_list_count       | Number of cues in the cue list                                                       | 42            |
+| cue_L_N_label        | Label of cue N in cue list L. Dots in the cue number become underscores.             | Blackout      |
 
-For example, cue 10.5's label is `$(etc-eos:cue_10_5_label)`, and a button showing the third cue in the list could use `$(etc-eos:cue_index_3_num)\n$(etc-eos:cue_index_3_label)`.
+For example, the label of cue 10.5 in cue list 1 is `$(etc-eos:cue_1_10_5_label)`, and cue 25's is `$(etc-eos:cue_1_25_label)`.
 
-`cue_N_label` variables are only created for cues that exist in the list. Cue parts aren't included.
+`cue_L_N_label` variables are only created for cues that exist in the list. Cue parts aren't included.
 
 ## Group labels
 

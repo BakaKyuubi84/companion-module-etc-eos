@@ -181,25 +181,22 @@ describe('ModuleInstance', () => {
 			expect(definedIds()).not.toContain('cue_list_count')
 		})
 
-		test('fills positional and per-number variables', () => {
+		test('creates a cue_<list>_<cue>_label variable per cue', () => {
 			instance.handleCueListRecord('1', '1', '0', '0', 'Preshow')
 			instance.handleCueListRecord('1', '10.5', '0', '1', 'Blackout')
 			instance.handleCueListRecord('1', '10.5', '2', '1', 'A part') // parts are ignored
 			instance.handleCueListRecord('2', '7', '0', '2', 'Other list') // other lists are ignored
 
-			expect(instance.instanceState).toMatchObject({
-				cue_index_1_num: '1',
-				cue_index_1_label: 'Preshow',
-				cue_index_2_num: '10.5',
-				cue_index_2_label: 'Blackout',
-				cue_index_3_num: '',
-				cue_index_3_label: '',
-			})
-
-			// Per-number variables are defined in a batch, then filled
+			// Variables are defined in a batch, then filled
 			jest.advanceTimersByTime(250)
-			expect(definedIds()).toEqual(expect.arrayContaining(['cue_1_label', 'cue_10_5_label', 'cue_index_3_label']))
-			expect(instance.instanceState).toMatchObject({ cue_1_label: 'Preshow', cue_10_5_label: 'Blackout' })
+			const ids = definedIds()
+			expect(ids).toEqual(expect.arrayContaining(['cue_list_count', 'cue_1_1_label', 'cue_1_10_5_label']))
+			expect(ids.filter((id) => /^cue_\d/.test(id))).toEqual(['cue_1_1_label', 'cue_1_10_5_label'])
+			expect(instance.instanceState).toMatchObject({ cue_1_1_label: 'Preshow', cue_1_10_5_label: 'Blackout' })
+
+			// A label change on an existing cue updates without redefining
+			instance.handleCueListRecord('1', '10.5', '0', '1', 'Fade out')
+			expect(instance.instanceState.cue_1_10_5_label).toBe('Fade out')
 		})
 
 		test('reads the cue position from the first argument, not the address', () => {
@@ -220,13 +217,12 @@ describe('ModuleInstance', () => {
 			onMessage(reply('1', 0, 'Preshow'))
 			onMessage(reply('2', 1, 'Top of show'))
 			onMessage(reply('4', 2, 'Blackout'))
+			jest.advanceTimersByTime(250)
 
 			expect(instance.instanceState).toMatchObject({
-				cue_index_1_num: '1',
-				cue_index_1_label: 'Preshow',
-				cue_index_2_num: '2',
-				cue_index_3_num: '4',
-				cue_index_3_label: 'Blackout',
+				cue_1_1_label: 'Preshow',
+				cue_1_2_label: 'Top of show',
+				cue_1_4_label: 'Blackout',
 			})
 		})
 
