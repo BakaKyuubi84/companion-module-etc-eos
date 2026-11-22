@@ -140,6 +140,7 @@ describe('ModuleInstance', () => {
 			instance.cueListDefinedNumbers = []
 			instance.sendOsc = jest.fn()
 			instance.setVariableDefinitions = jest.fn()
+			instance.setPresetDefinitions = jest.fn()
 		})
 
 		afterEach(() => {
@@ -191,8 +192,18 @@ describe('ModuleInstance', () => {
 			jest.advanceTimersByTime(250)
 			const ids = definedIds()
 			expect(ids).toEqual(expect.arrayContaining(['cue_list_count', 'cue_1_1_label', 'cue_1_10_5_label']))
-			expect(ids.filter((id) => /^cue_\d/.test(id))).toEqual(['cue_1_1_label', 'cue_1_10_5_label'])
-			expect(instance.instanceState).toMatchObject({ cue_1_1_label: 'Preshow', cue_1_10_5_label: 'Blackout' })
+			expect(ids.filter((id) => /^cue_\d/.test(id))).toEqual([
+				'cue_1_1_num',
+				'cue_1_1_label',
+				'cue_1_10_5_num',
+				'cue_1_10_5_label',
+			])
+			expect(instance.instanceState).toMatchObject({
+				cue_1_1_num: '1',
+				cue_1_1_label: 'Preshow',
+				cue_1_10_5_num: '10.5',
+				cue_1_10_5_label: 'Blackout',
+			})
 
 			// A label change on an existing cue updates without redefining
 			instance.handleCueListRecord('1', '10.5', '0', '1', 'Fade out')

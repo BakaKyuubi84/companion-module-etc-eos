@@ -905,6 +905,7 @@ class ModuleInstance extends InstanceBase {
 		// Drop the per-cue variables; they're re-created as the cues arrive.
 		this.cueListDefinedNumbers = []
 		this.setVariableDefinitions(GetVariableDefinitions(this))
+		this.updatePresets()
 		this.setInstanceStates({ cue_list_count: '' }, true)
 	}
 
@@ -985,14 +986,16 @@ class ModuleInstance extends InstanceBase {
 	}
 
 	/**
-	 * The variable id for a cue's label: cue_<list>_<cue>_label, with dots in the cue number as underscores.
+	 * The variable id for a cue's number or label: cue_<list>_<cue>_num / _label, with dots in the cue
+	 * number as underscores.
 	 */
-	cueLabelVariableId(cueNumber) {
-		return `cue_${this.getCueListToPoll()}_${this.cueNumberToVariableId(cueNumber)}_label`
+	cueVariableId(cueNumber, field) {
+		return `cue_${this.getCueListToPoll()}_${this.cueNumberToVariableId(cueNumber)}_${field}`
 	}
 
 	/**
-	 * Updates the cue_<list>_<cue>_label variables, creating definitions for new cue numbers first.
+	 * Updates the cue_<list>_<cue>_num/_label variables, creating definitions (and presets) for new cue
+	 * numbers first.
 	 */
 	updateCueListVariables() {
 		const cues = this.getSortedCueListRecords()
@@ -1006,7 +1009,8 @@ class ModuleInstance extends InstanceBase {
 
 		if (!definitionsChanged) {
 			for (const cue of cues) {
-				values[this.cueLabelVariableId(cue.num)] = cue.label
+				values[this.cueVariableId(cue.num, 'num')] = cue.num
+				values[this.cueVariableId(cue.num, 'label')] = cue.label
 			}
 		} else if (this.cueListDefinitionsTimer === undefined) {
 			// New cue numbers need new variable definitions. Batch them, as cues arrive one message at a time.
@@ -1014,6 +1018,7 @@ class ModuleInstance extends InstanceBase {
 				delete this.cueListDefinitionsTimer
 				this.cueListDefinedNumbers = this.getSortedCueListRecords().map((cue) => cue.num)
 				this.setVariableDefinitions(GetVariableDefinitions(this))
+				this.updatePresets()
 				this.updateCueListVariables()
 			}, 250)
 		}

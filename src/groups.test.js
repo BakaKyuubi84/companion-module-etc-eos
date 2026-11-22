@@ -64,3 +64,32 @@ describe('Group presets', () => {
 		expect(Object.keys(presets).filter((id) => id.startsWith('macro_'))).toEqual(['macro_90'])
 	})
 })
+
+describe('Cue presets', () => {
+	test('one preset per cue in the polled list, with number and label text', () => {
+		const self = {
+			setPresetDefinitions: jest.fn(),
+			getCueListToPoll: () => 1,
+			cueListDefinedNumbers: ['3', '10.5'],
+		}
+		UpdatePresetDefinitions(self)
+		const presets = self.setPresetDefinitions.mock.calls[0][0]
+
+		expect(presets.cue_1_3.style.text).toBe('Cue: $(etc-eos:cue_1_3_num)\n$(etc-eos:cue_1_3_label)')
+		expect(presets.cue_1_10_5.style.text).toBe('Cue: $(etc-eos:cue_1_10_5_num)\n$(etc-eos:cue_1_10_5_label)')
+		expect(presets.cue_1_10_5.steps[0].down[0]).toEqual({
+			actionId: 'run_cue',
+			options: { list: '1', number: '10.5' },
+		})
+		expect(presets.cue_1_10_5.feedbacks.map((f) => [f.feedbackId, f.options])).toEqual([
+			['pending_cue', { list: '1', number: '10.5' }],
+			['active_cue', { list: '1', number: '10.5' }],
+		])
+	})
+
+	test('no per-cue presets when cue variables are off', () => {
+		const self = { setPresetDefinitions: jest.fn(), getCueListToPoll: () => 0, cueListDefinedNumbers: ['3'] }
+		UpdatePresetDefinitions(self)
+		expect(self.setPresetDefinitions.mock.calls[0][0].cue_1_3).toBeUndefined()
+	})
+})

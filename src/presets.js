@@ -138,6 +138,44 @@ module.exports = function (self) {
 	const targetNumbers = (type) => self.labelDefinedNumbers?.[type] || []
 	const variableId = (num) => String(num).replace(/\./g, '_')
 
+	// One preset per cue in the polled cue list: runs the cue, shows its number and label, and lights up
+	// when the cue is pending or active.
+	const cueList = typeof self.getCueListToPoll === 'function' ? self.getCueListToPoll() : 0
+	if (cueList > 0) {
+		for (const num of self.cueListDefinedNumbers || []) {
+			const id = `${cueList}_${variableId(num)}`
+			presets[`cue_${id}`] = {
+				type: 'button',
+				category: 'Cues',
+				name: `Cue ${cueList}/${num}`,
+				style: {
+					text: `Cue: $(etc-eos:cue_${id}_num)\n$(etc-eos:cue_${id}_label)`,
+					size: 'auto',
+					color: combineRgb(255, 255, 255),
+					bgcolor: combineRgb(0, 0, 0),
+				},
+				steps: [
+					{
+						down: [{ actionId: 'run_cue', options: { list: `${cueList}`, number: `${num}` } }],
+						up: [],
+					},
+				],
+				feedbacks: [
+					{
+						feedbackId: 'pending_cue',
+						options: { list: `${cueList}`, number: `${num}` },
+						style: { bgcolor: combineRgb(204, 102, 0), color: combineRgb(255, 255, 255) },
+					},
+					{
+						feedbackId: 'active_cue',
+						options: { list: `${cueList}`, number: `${num}` },
+						style: { bgcolor: combineRgb(51, 102, 0), color: combineRgb(255, 255, 255) },
+					},
+				],
+			}
+		}
+	}
+
 	for (const i of targetNumbers('group')) {
 		presets[`group_${variableId(i)}`] = {
 			type: 'button',

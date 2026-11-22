@@ -86,6 +86,7 @@ const GetVariableDefinitions = function (self) {
 		variableDefinitions.push({ variableId: 'cue_list_count', name: `Number of cues in cue list ${cueList}` })
 		for (const cueNumber of self.cueListDefinedNumbers || []) {
 			const id = String(cueNumber).replace(/\./g, '_')
+			variableDefinitions.push({ variableId: `cue_${cueList}_${id}_num`, name: `Cue ${cueList}/${cueNumber} number` })
 			variableDefinitions.push({ variableId: `cue_${cueList}_${id}_label`, name: `Cue ${cueList}/${cueNumber} label` })
 		}
 	}

@@ -266,11 +266,14 @@ The module reads the cues of one cue list (set with **Cue list for cue variables
 | Variable             | Description                                                                          | Example value |
 | -------------------- | ------------------------------------------------------------------------------------ | ------------- |
 | cue_list_count       | Number of cues in the cue list                                                       | 42            |
+| cue_L_N_num          | Number of cue N in cue list L, once the cue has been read from the console.          | 10.5          |
 | cue_L_N_label        | Label of cue N in cue list L. Dots in the cue number become underscores.             | Blackout      |
 
 For example, the label of cue 10.5 in cue list 1 is `$(etc-eos:cue_1_10_5_label)`, and cue 25's is `$(etc-eos:cue_1_25_label)`.
 
-`cue_L_N_label` variables are only created for cues that exist in the list. Cue parts aren't included.
+The **Cues** presets include a button for each cue in the list, with the text `Cue: $(etc-eos:cue_L_N_num)\n$(etc-eos:cue_L_N_label)`. It runs the cue, and turns orange when the cue is pending and green when it's active.
+
+`cue_L_N_num` and `cue_L_N_label` variables are only created for cues that exist in the list. Cue parts aren't included.
 
 ## Group labels
 
@@ -301,6 +304,7 @@ Presets help you quickly configure new buttons. There are several presets availa
 | Category | Name                       | Description                                                                                                                                        |
 | -------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Cues     | Cue #                      | Runs the cue number. Adds feedback to show whether this cue is active or is pending. _Don't forget to change the cue number in the feedbacks too!_ |
+| Cues     | Cue: [NUMBER] [LABEL]      | One per cue in the polled cue list. Runs the cue, shows its number and label, and shows whether it's pending or active. |
 | Cues     | Go [CUE] [INTENSITY%]      | The same as the "Go" button on your console. Also shows the pending cue number and the cue's intensity as the button's text.                       |
 | Cues     | Stop/Back                  | The same as the "Stop/Back" button on your console.                                                                                                |
 | Groups   | G# [GROUP LABEL]           | Selects the group. Shows the group number and its label. One preset per group in the show.                                                          |
